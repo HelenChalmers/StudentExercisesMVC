@@ -8,6 +8,7 @@ using Dapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using StudentExerciseMVC.Models.ViewModels;
 using StudentExercisesAPI.Data;
 
 namespace StudentExerciseMVC.Controllers
@@ -75,30 +76,36 @@ namespace StudentExerciseMVC.Controllers
 
         }
 
-            // GET: Instructors/Create
-            public ActionResult Create()
-            {
-                return View();
-            }
-        
+        // GET: Instructors/Create
+        public ActionResult Create()
+        {
+            var model = new InstructorCreateViewModel(_config);
+            return View(model);
+        }
+
 
         // POST: Instructors/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<ActionResult> Create(InstructorCreateViewModel model)
         {
-            try
-            {
-                // TODO: Add insert logic here
+            string sql = $@"INSERT INTO Student 
+            (FirstName, LastName, SlackHandle, CohortId)
+            VALUES
+            (
+                '{model.instructor.FirstName}'
+                ,'{model.instructor.LastName}'
+                ,'{model.instructor.SlackHandle}'
+                ,{model.instructor.CohortId}
+            );";
 
+            using (IDbConnection conn = Connection)
+            {
+                var newId = await conn.ExecuteAsync(sql);
                 return RedirectToAction(nameof(Index));
             }
-            catch
-            {
-                return View();
-            }
-        }
 
+        }
         // GET: Instructors/Edit/5
         public ActionResult Edit(int id)
         {
